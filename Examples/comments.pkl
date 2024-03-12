@@ -1,0 +1,22 @@
+amends ".../Stack.pkl"
+
+// About and Annotations
+// 
+// The About object is an optional object that holds information the developer 
+// would like to save, including the version of the stack file and a description.
+// 
+// The top level annotations object is a key value store that's meant for the developer.
+// If a developer wishes to store additional information in this area, they can do so 
+// without impacting any other configuration throughout the stack.
+
+about {
+    version = "1.0"
+    description = "Stack Demo"
+}
+
+annotations = new Mapping {
+    ["somekey"] = "somevalue"
+    ["otherkey"] {
+        notes = "secret"
+    }
+}

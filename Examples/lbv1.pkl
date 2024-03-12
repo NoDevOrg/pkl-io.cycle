@@ -1,0 +1,44 @@
+amends ".../Stack.pkl"
+
+// Example with V1 load balancer service
+
+services {
+    loadbalancer {
+        ipv4 = true
+        ipv6 = true
+        details = new LBV1 {
+            controllers {
+                ["443"] {
+                    identifier = "super secure 443"
+                    transport {
+                        mode = "http"
+                        config {
+                            performance = false
+                            ingress {
+                                port = 443
+                                tls {
+                                    enable = true
+                                }
+                            }
+                            timeouts {
+                                idle = "60s"
+                            }
+                        }
+                        routers {
+                            new {
+                                mode = "round-robin"
+                                config {
+                                    sticky_sessions = true
+                                    destination_retries = 3
+                                    timeouts {
+                                        destination_connection = "3s"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

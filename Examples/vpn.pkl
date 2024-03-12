@@ -1,0 +1,13 @@
+amends ".../Stack.pkl"
+
+// Example with VPN service
+
+services {
+    vpn {
+        auth {
+            cycle_accounts = true
+            vpn_accounts = true
+        }
+        allow_internet = true
+    }
+}

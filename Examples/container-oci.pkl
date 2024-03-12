@@ -1,0 +1,61 @@
+amends ".../Stack.pkl"
+
+// Example of how to add a container with an OCIRegistryOrigin
+
+local ghcrDetails = new OCIRegistryOriginAuthUserDetails {
+    username = "cycle-bot"
+    token = "super-secret-token"
+}
+
+local authService = new OCIRegistryOrigin {
+    target = "auth:latest"
+    url = "ghcr.io/org-name"
+    auth {
+        details = ghcrDetails
+    }
+}
+
+local userService = new OCIRegistryOrigin {
+    target = "user:latest"
+    url = "ghcr.io/org-name"
+    auth {
+        details = ghcrDetails
+    }
+}
+
+containers {
+    ["auth"] {
+        name = "auth"
+        image {
+            origin {
+                details = authService
+            }
+        }
+        config {
+            network {
+                hostname = "auth"
+                public = "enable"
+            }
+            deploy {
+                instances = 1
+            }
+        }
+    }
+    ["user"] {
+        name = "user"
+        image {
+            origin {
+                details = userService
+            }
+        }
+        config {
+            network {
+                hostname = "user"
+                public = "egress-only"
+            }
+            deploy {
+                instances = 1
+            }
+        }
+    }
+}

@@ -1,0 +1,31 @@
+amends ".../Stack.pkl"
+
+// Example with HAProxy load balancer service
+
+services {
+    loadbalancer {
+        ipv4 = true
+        ipv6 = true
+        details = new HAProxy {
+            ports {
+                ["60194"] {
+                    frontend {
+                        mode = "tcp"
+                        max_connections = 50
+                        timeouts {
+                            client_secs = 8
+                        }
+                    }
+                    backend {
+                        balance = "source"
+                        timeouts {
+                            server_secs = 8
+                            connect_ms = 500
+                            queue_ms = 500
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
