@@ -1,0 +1,334 @@
+typealias CycleStackVersion = "1.0"
+
+// Currently only version 1.0 is available
+fixed version: CycleStackVersion = "1.0"
+
+// Extra information about this stack. Not used by the platform.
+about: About?
+
+// A key value store of custom data for your stack. Not used by the platform internally.
+annotations: Mapping<String, String|Dynamic>?
+
+// Define configuration settings for the environment services
+services: Services?
+
+// An array of scoped variables, assignable to the containers in the stack.
+// scoped_variables: Listing
+
+// An object where the key is a container identifier and the value is a container object.
+containers: Mapping<String, Container>
+
+class About {
+    version: String
+    description: String
+}
+
+class Services {
+    // Settings for the discovery service.
+    discovery: Discovery?
+    // Settings for the load balancer service.
+    loadbalancer: LoadBalancer?
+    // Settings for VPN service.
+    vpn: VPN?
+}
+
+class Discovery {
+    // A record of hosts and the IP's they should resolve to.
+    hosts: Mapping<String, DiscoveryHost>
+}
+
+class DiscoveryHost {
+    // An array of IPv4 addresses this hostname can resolve to.
+    ipv4: Listing<String>
+    // An array of IPv6 addresses this hostname can resolve to.
+    ipv6: Listing<String>
+}
+
+class LoadBalancer {
+    type: String =
+    if (details is HAProxy) "haproxy"
+    else if (details is LBV1) "v1"
+    else "default"
+
+    ipv4: Boolean
+    ipv6: Boolean
+    details: (HAProxy | LBV1)?
+}
+
+class HAProxy {
+    default: HAProxySettings
+    ports: Mapping<String, HAProxySettings>?
+}
+
+class HAProxySettings {
+    frontend: HAProxyFrontend?
+    backend: HAProxyBackend?
+}
+
+typealias HAProxyFrontendMode = "tcp" | "http"
+
+class HAProxyFrontend {
+    mode: HAProxyFrontendMode
+    max_connections: UInt?
+    timeouts: HAProxyFrontendTimeouts?
+}
+
+class HAProxyFrontendTimeouts {
+    client_secs: UInt?
+    client_fin_ms: UInt?
+    http_keep_alive_ms: UInt?
+    http_request_ms: UInt?
+}
+
+typealias HAProxyBackendBalance = "roundrobin" | "static-rr" | "leastconn" | "first" | "source"
+
+class HAProxyBackend {
+    balance: HAProxyBackendBalance
+    timeouts: HAProxyBackendTimeouts?
+}
+
+class HAProxyBackendTimeouts {
+    server_secs: UInt?
+    server_fin_ms: UInt?
+    connect_ms: UInt?
+    queue_ms: UInt?
+}
+
+class LBV1 {
+    controllers: Mapping<String, LBV1Controller>
+}
+
+class LBV1Controller {
+    identifier: String
+    transport: LBV1Transport
+}
+
+typealias LBV1TransportMode = "tcp" | "http"
+
+class LBV1Transport {
+    mode: LBV1TransportMode
+    config: LBV1TransportConfig?
+    routers: Listing<LBV1Router>
+}
+
+class LBV1TransportConfig {
+    performance: Boolean
+    ingress: LBV1TransportIngress
+    timeouts: LBV1TransportTimeouts
+    extension: LBV1TransportExtension?
+}
+
+class LBV1TransportIngress {
+    port: UInt
+    tls: LBV1TransportTLS?
+}
+
+class LBV1TransportTLS {
+    enable: Boolean
+}
+
+class LBV1TransportTimeouts {
+    idle: String
+}
+
+// TODO: Update this based on the docs
+class LBV1TransportExtension {
+
+}
+
+typealias LBV1RouterMode = "random" | "round-robin"
+
+class LBV1Router {
+    match: LBV1RouterMatch
+    mode: LBV1RouterMode
+    config: LBV1RouterConfig
+}
+
+class LBV1RouterMatch {
+    domains: Listing<String>?
+    internal_port: Listing<UInt>?
+    path: String?
+}
+
+class LBV1RouterConfig {
+    sticky_sessions: Boolean
+    destination_retries: UInt
+    timeouts: LBV1RouterTimeouts
+    tls: LBV1RouterTLS?
+    extension: LBV1RouterExtension?
+}
+
+class LBV1RouterTimeouts {
+    destination_connection: String
+}
+
+typealias LBV1RouterTLSClientAuthValue = "request" | "require" | "require-verify"
+
+class LBV1RouterTLS {
+    server_name: String?
+    allow_insecure: Boolean?
+    client_auth: LBV1RouterTLSClientAuthValue?
+    client_cert_auth: String?
+}
+
+// TODO: Complete from docs
+class LBV1RouterExtension {
+
+}
+
+class VPN {
+    auth: VPNAuth
+    allow_internet: Boolean
+}
+
+class VPNAuth {
+    cycle_accounts: Boolean
+    vpn_accounts: Boolean
+    webhook: String?
+}
+
+class Container {
+    name: String
+    image: ContainerImage
+    annotations: Mapping<String, String|Dynamic>?
+    stateful: Boolean?
+    config: ContainerConfig?
+    volumes: ContainerVolumes?
+    deprecate: Boolean?
+}
+
+class ContainerConfig {
+    network: ContainerNetwork
+    deploy: ContainerDeploy
+    runtime: ContainerRuntime?
+    resources: ContainerResources?
+    integrations: ContainerIntegrations?
+}
+
+typealias ContainerNetworkPublicValue = "enable" | "disable" | "egress-only"
+
+class ContainerNetwork {
+    hostname: String
+    public: ContainerNetworkPublicValue
+    ports: Listing<String>?
+}
+
+// TODO: Add auto-scale properties
+class ContainerScale {
+    
+}
+
+// TODO: Add the rest of the properties
+class ContainerDeploy {
+    instances: UInt
+    strategy: String?
+}
+
+class ContainerRuntime {
+
+}
+
+class ContainerResources {
+
+}
+
+class ContainerIntegrations {
+
+}
+
+class ContainerVolumes {
+
+}
+
+class ContainerImage {
+    name: String?
+    origin: ContainerImageOrigin
+    build: ContainerImageBuild?
+    builder: ContainerImageBuilder?
+}
+
+class ContainerImageBuild {
+    args: Mapping<String, String>?
+}
+
+class ContainerImageBuilder {
+    integration_id: String
+}
+
+class ContainerImageOrigin {
+    type: String =
+    if (details is DockerFileOrigin) "docker-file"
+    else if (details is DockerRegistryOrigin) "docker-registry"
+    else if (details is DockerHubOrigin) "docker-hub"
+    else if (details is OCIRegistryOrigin) "oci-registry"
+    else if (details is CycleSourceOrigin) "cycle-source"
+    else throw("Unknown Origin.details type")
+
+    details: DockerFileOrigin | DockerRegistryOrigin | DockerHubOrigin | OCIRegistryOrigin | CycleSourceOrigin
+}
+
+// TODO: Complete this later
+class DockerFileOrigin {
+
+}
+
+// TODO: Complete this later
+class DockerRegistryOrigin {
+
+}
+
+// TODO: Complete this later
+class DockerHubOrigin {
+
+}
+
+class OCIRegistryOrigin {
+    target: String
+    url: String
+    auth: OCIRegistryOriginAuth?
+}
+
+class OCIRegistryOriginAuth {
+    type: String = 
+    if (details is OCIRegistryOriginAuthUserDetails) "user"
+    else if (details is OCIRegistryOriginAuthProviderDetails) "provider"
+    else if (details is OCIRegistryOriginAuthWebhookDetails) "webhook"
+    else throw("Unknown OCIRegistryOriginAuth.details type")
+
+    details: OCIRegistryOriginAuthUserDetails | OCIRegistryOriginAuthProviderDetails | OCIRegistryOriginAuthWebhookDetails
+}
+
+class OCIRegistryOriginAuthUserDetails {
+    username: String
+    token: String
+}
+
+class OCIRegistryOriginAuthProviderDetails {
+    flavor: String =
+    if (credentials is OCIRegistryECRCredentials) "ecr"
+    else throw("Unknown OCIRegistryOriginAuthProviderDetails.credentials type")
+    
+    credentials: OCIRegistryECRCredentials
+}
+
+class OCIRegistryECRCredentials {
+    region: String?
+    namespace: String?
+    api_key: String?
+    secret: String?
+    subscription_id: String?
+    client_id: String?
+    config: String?
+}
+
+class OCIRegistryOriginAuthWebhookDetails {
+    url: String
+}
+
+class CycleSourceOrigin {
+    source_id: String
+}
+
+output {
+    renderer = new JsonRenderer {}
+}
