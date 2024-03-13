@@ -221,21 +221,24 @@ class ContainerScale {
 // TODO: Add the rest of the properties
 class ContainerDeploy {
     instances: UInt
-    strategy: String?
 }
 
+// TODO: Add the rest of the properties
 class ContainerRuntime {
-
+    environment_vars: Mapping<String, String>?
 }
 
+// TODO: Add the rest of the properties
 class ContainerResources {
 
 }
 
+// TODO: Add the rest of the properties
 class ContainerIntegrations {
 
 }
 
+// TODO: Add the rest of the properties
 class ContainerVolumes {
 
 }
