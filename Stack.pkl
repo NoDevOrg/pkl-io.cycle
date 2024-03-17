@@ -226,6 +226,12 @@ class ContainerDeploy {
 // TODO: Add the rest of the properties
 class ContainerRuntime {
     environment_vars: Mapping<String, String>?
+    command: ContainerRuntimeCommand?
+}
+
+class ContainerRuntimeCommand {
+    path: String
+    args: String
 }
 
 // TODO: Add the rest of the properties
